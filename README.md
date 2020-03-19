@@ -414,11 +414,33 @@ Most thing are there to use this in production. You just need to change the rele
 The most important being the default passwords and keys.
 
 
-## Run the scripts
+### Run the scripts
 
 Ok now just run the **runAll.sh** script.
 
 This will bring everything up except the Angular frontend.
+
+### The final step once everything is running is to do the DB migrations.
+
+First you need to enter the laravel docker container.
+
+There is a script ready for you to make this easier.
+
+In your console enter the haakco-api directory then run the following script.
+
+```shell script
+./scripts/execLocalPhp.sh
+```
+
+This should give you a shell running as the web user in the laravel container.
+
+Now just run
+
+```shell script
+./artisan migrate
+```
+
+You should now be done with the API section of the setup.
 
 ## Angular Frontend
 
