@@ -101,10 +101,10 @@ export AWS_URL=""
 export AWS_HOSTED_ZONE_ID=""
 
 export TRAEFIK_DOMAIN="${DNS_DOMAIN}"
-export VOLUME_TRAEFIK_DIR="${RUN_DIR}/stack-files"
-export VOLUME_TRAEFIK_DIR_CERTIFICATE_PEM="${VOLUME_TRAEFIK_DIR}/letsencrypt/dev.fullchain.pem"
-export VOLUME_TRAEFIK_DIR_PRIVKEY_PEM="${VOLUME_TRAEFIK_DIR}/letsencrypt/dev.privkey.pem"
-export VOLUME_TRAEFIK_TRAEFIK_YAML="${VOLUME_TRAEFIK_DIR}/traefik/traefik.yaml"
+export VOLUME_TRAEFIK_DIR=$(realpath "${RUN_DIR}/stack-files")
+export VOLUME_TRAEFIK_DIR_CERTIFICATE_PEM=$(realpath "${VOLUME_TRAEFIK_DIR}/letsencrypt/dev.fullchain.pem")
+export VOLUME_TRAEFIK_DIR_PRIVKEY_PEM=$(realpath "${VOLUME_TRAEFIK_DIR}/letsencrypt/dev.privkey.pem")
+export VOLUME_TRAEFIK_TRAEFIK_YAML=$(realpath "${VOLUME_TRAEFIK_DIR}/traefik/traefik.yaml")
 
 export API_APP_NAME="${APP_NAME}"
 export API_APP_ENV='local'
@@ -192,11 +192,11 @@ export API_LARAVEL_WEBSOCKET_HOST="${DNS_DOMAIN}"
 export API_LARAVEL_WEBSOCKET_PORT='6001'
 export API_LARAVEL_WEBSOCKET_ENABLE_STATISTICS='true'
 
-export VOLUME_LARAVEL_API="${RUN_DIR}/../../haakco-api"
-export VOLUME_LARAVEL_API_ZSH_HISTORY_WEB="${RUN_DIR}/../../docker-data/haakco-api/zsh_history_web"
-export VOLUME_LARAVEL_API_ZSH_HISTORY_ROOT="${RUN_DIR}/../../docker-data/haakco-api/zsh_history_root"
-export VOLUME_LARAVEL_API_BASH_HISTORY_WEB="${RUN_DIR}/../../docker-data/haakco-api/bash_history_web"
-export VOLUME_LARAVEL_API_BASH_HISTORY_ROOT="${RUN_DIR}/../../docker-data/haakco-api/bash_history_root"
+export VOLUME_LARAVEL_API=$(realpath "${RUN_DIR}/../../haakco-api")
+export VOLUME_LARAVEL_API_ZSH_HISTORY_WEB=$(realpath "${RUN_DIR}/../../docker-data/haakco-api/zsh_history_web")
+export VOLUME_LARAVEL_API_ZSH_HISTORY_ROOT=$(realpath "${RUN_DIR}/../../docker-data/haakco-api/zsh_history_root")
+export VOLUME_LARAVEL_API_BASH_HISTORY_WEB=$(realpath "${RUN_DIR}/../../docker-data/haakco-api/bash_history_web")
+export VOLUME_LARAVEL_API_BASH_HISTORY_ROOT=$(realpath "${RUN_DIR}/../../docker-data/haakco-api/bash_history_root")
 
 mkdir -p "$(dirname "${VOLUME_LARAVEL_API_ZSH_HISTORY_WEB}")"
 touch "${VOLUME_LARAVEL_API_ZSH_HISTORY_WEB}"
