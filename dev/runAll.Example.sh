@@ -101,7 +101,7 @@ export AWS_URL=""
 export AWS_HOSTED_ZONE_ID=""
 
 export TRAEFIK_DOMAIN="${DNS_DOMAIN}"
-export VOLUME_TRAEFIK_DIR="${RUN_DIR}/dev/stack-files"
+export VOLUME_TRAEFIK_DIR="${RUN_DIR}/stack-files"
 export VOLUME_TRAEFIK_DIR_CERTIFICATE_PEM="${VOLUME_TRAEFIK_DIR}/letsencrypt/dev.fullchain.pem"
 export VOLUME_TRAEFIK_DIR_PRIVKEY_PEM="${VOLUME_TRAEFIK_DIR}/letsencrypt/dev.privkey.pem"
 export VOLUME_TRAEFIK_TRAEFIK_YAML="${VOLUME_TRAEFIK_DIR}/traefik/traefik.yaml"

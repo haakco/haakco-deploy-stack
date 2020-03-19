@@ -44,7 +44,7 @@ Still needs to be done :(
 
 # Core Ideas
 
-##This project is opinionated in its choices.
+## This project is opinionated in its choices.
 
 This is mainly to simplify things and get it all working faster. Though this means if you disagree
 with the choice of something like the DB I'm not going to be changing it.
@@ -53,7 +53,7 @@ Having said that at a far later stage I would like to have different choices for
 An example of this is the frontend which is currently written in Angular. I would like to also
 have one in ReactJs and possibly Vue. (If you are keen help would be appreciated)
 
-##Try to have smaller separate pieces when it makes sense
+## Try to have smaller separate pieces when it makes sense
 
 This project it going to fall between being a monolith and be as modular as possible.
 
@@ -61,7 +61,7 @@ The main api code for now will be a monolith. This is once again an attempt to s
 and get them out. Eventually I would like to move the code into a library, so it's simpler to use
 and get updates but unlikely to happen near term.
 
-##Each piece will be hosted in a separate github repository
+## Each piece will be hosted in a separate github repository
 
 This is to make it simpler to update each pieces individually.
 
@@ -71,7 +71,7 @@ It will also hopefully eventually allow pieces to be replaceable. Ie the fronten
 
 ## Server Technologies
 
-###Docker
+### Docker
 
 Main piece to run all the code.
 
@@ -133,41 +133,50 @@ I'm planning for now to do Digital Ocean and possibly AWS.
 
 ### Api
 
-The main API code is written in PHP using the Laravel framework. Currently, running PHP
+The main API code is written in PHP using the [Laravel](https://laravel.com/) framework. Currently, running PHP 7.4.3 and Laravel 7.1
 
 ### DB
 
-The DB is PostgreSQL.
+The DB is (PostgreSQL)[https://www.postgresql.org/].
 
 **I have the basic code and deployment for HA for production done just needs cleanup.**
 
 ### Caching/Queuing
 
-Using Redis for caching and queuing.
+Using (Redis)[https://redis.io/] for caching and queuing. Using the built in
+(queuing of Laravel)[https://laravel.com/docs/7.x/queues] and (Laravel Horizon)[https://laravel.com/docs/7.x/horizon].
 
 **Still need to put some work into the code to deploy a HA cluster for production.**
 
 ### Mail Relay
 
-Using postfix for basic relaying and queuing of email. Though would highly recommend that you have an up stream relay
+Using (Postfix)[http://www.postfix.org/] for basic relaying and queuing of email. Though would highly recommend that you have an up stream relay
 and don't send directly.
 
 The docker image can be configured to do both.
 
 ## Logging and Future search
 
-Using the ELK stack for logging. Currently, not doing any searching in the main Laravel App,
+Using the (ELK stack)[https://www.elastic.co/what-is/elk-stack] for logging.
+
+Currently, not doing any searching in the main Laravel App,
 Though in future this will be done by Elastic.
+
+## Basic application monitoring
+
+Currently, using (Laravel Telescope)[https://laravel.com/docs/7.x/telescope] to help with basic monitoring.
 
 ## File storage
 
-If you are not wanting to do cloud storage, then MinIo which will be the default.
+If you choose not to use cloud storage, then (MinIo)[https://min.io/] which will be the default.
 
-Otherwise, you can either use Google Drive or AWS S3.
+Otherwise, you can either use Google Drive or (AWS S3)[https://aws.amazon.com/s3/].
 
 ## Container updating
 
-Currently, using Ouroboros. Though this may change as it doesn't seem to always work correctly.
+Currently, using (Ouroboros)[https://github.com/pyouroboros/ouroboros].
+
+Though this may change as it doesn't seem to always work correctly.
 
 Though I haven't had time to test and confirm yet or find a replacement.
 
@@ -500,7 +509,7 @@ It is high on my list once I have stabilised the API.
 
 **Any help here would be appreciated**
 
-##More to follow, as I remember
+## More to follow, as I remember
 
 # Links to all github repositories used in this project
 
