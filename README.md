@@ -525,6 +525,9 @@ It is high on my list once I have stabilised the API.
   * https://github.com/haakco/docker-logstash.git
     * https://hub.docker.com/repository/docker/haakco/logstash
 
+  * https://github.com/haakco/docker-nginx-alpine.git
+    * https://hub.docker.com/repository/docker/haakco/logstash
+
 
 
 
