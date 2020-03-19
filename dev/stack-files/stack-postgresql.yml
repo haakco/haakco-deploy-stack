@@ -1,0 +1,53 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+services:
+  pgmaster:
+    image: haakco/postgres12
+    hostname: pgmaster.server
+    environment:
+      - 'TZ=Africa/Johannesburg'
+      - "POSTGRES_DB=${POSTGRES_DB}"
+      - "POSTGRES_USER=${POSTGRES_USER}"
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+      - "MAX_CONNECTIONS=${POSTGRES_MAX_CONNECTIONS}"
+      - "SHARED_BUFFERS=${POSTGRES_SHARED_BUFFERS}"
+      - "EFFECTIVE_CACHE_SIZE=${POSTGRES_EFFECTIVE_CACHE_SIZE}"
+      - "MAINTENANCE_WORK_MEM=${POSTGRES_MAINTENANCE_WORK_MEM}"
+      - "CHECKPOINT_COMPLETION_TARGET=${POSTGRES_CHECKPOINT_COMPLETION_TARGET}"
+      - "WAL_BUFFERS=${POSTGRES_WAL_BUFFERS}"
+      - "DEFAULT_STATISTICS_TARGET=${POSTGRES_DEFAULT_STATISTICS_TARGET}"
+      - "RANDOM_PAGE_COST=${POSTGRES_RANDOM_PAGE_COST}"
+      - "EFFECTIVE_IO_CONCURRENCY=${POSTGRES_EFFECTIVE_IO_CONCURRENCY}"
+      - "WORK_MEM=${POSTGRES_WORK_MEM}"
+      - "MIN_WAL_SIZE=${POSTGRES_MIN_WAL_SIZE}"
+      - "MAX_WAL_SIZE=${POSTGRES_MAX_WAL_SIZE}"
+      - "MAX_WORKER_PROCESSES=${POSTGRES_MAX_WORKER_PROCESSES}"
+      - "MAX_PARALLEL_WORKERS_PER_GATHER=${POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER}"
+      - "MAX_PARALLEL_WORKERS=${POSTGRES_MAX_PARALLEL_WORKERS}"
+    ports:
+      - "5432:5432"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "traefik.enable=false"
+    volumes:
+      - 'db_haakco_pgmaster_vol:/var/lib/postgresql/data'
+    networks:
+      haakco-net:
+        aliases:
+          - pgmaster.server
+networks:
+  haakco-net:
+    external: true
+    driver: overlay
+volumes:
+  db_haakco_pgmaster_vol:
+    external: false
+    name: db_haakco_pgmaster_vol

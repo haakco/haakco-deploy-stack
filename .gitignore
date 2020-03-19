@@ -1,0 +1,9 @@
+# Created by .gitignore support plugin (hsz.mobi)
+.idea
+*.iml
+.DS_Store
+.docker-sync
+/dev/stack-files/certificates/acme.json
+/dev/runAll.sh
+#/dev/stack-files/letsencrypt/*
+!/dev/stack-files/letsencrypt/.gitkeep

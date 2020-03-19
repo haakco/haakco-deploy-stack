@@ -1,0 +1,52 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+services:
+  minio:
+    image: minio/minio
+    hostname: minio.server
+    command:
+      - "server"
+      - "--json"
+      - "/data"
+    environment:
+      - 'TZ=Africa/Johannesburg'
+      - "MINIO_DOMAIN=minio.${ADMIN_DOMAIN}"
+      - "MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}"
+      - "MINIO_SECRET_KEY=${MINIO_SECRET_KEY}"
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - 'traefik.enable=true'
+        - "traefik.http.routers.minio.rule=Host(`minio.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.minio.entrypoints=websecure"
+        - "traefik.http.services.minio.loadbalancer.server.port=9000"
+        - "traefik.http.routers.minio.tls=true"
+    ports:
+      - '${MINIO_PORT}:9000'
+    volumes:
+      - 'db_minio_vol:/data'
+    networks:
+      haakco-net:
+        aliases:
+          - 'minio.server'
+      traefik-net:
+        aliases:
+          - 'minio.server'
+networks:
+  haakco-net:
+    external: true
+    driver: overlay
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay
+volumes:
+  db_minio_vol:
+    external: false
+    name: db_minio_vol

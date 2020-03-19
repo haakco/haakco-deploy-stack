@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  ouroboros:
+    image: pyouroboros/ouroboros
+    environment:
+      - 'TZ=Africa/Johannesburg'
+      - 'INTERVAL=300'
+      - 'SELF_UPDATE=true'
+      - 'CLEANUP=true'
+      - 'REPO_USER=serverhaakco'
+      - 'REPO_PASS=lEyoUSCitalTIoli'
+      - 'LABEL_ENABLE=true'
+      - 'slack://hooks.slack.com/services/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'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager

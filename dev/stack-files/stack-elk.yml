@@ -1,0 +1,165 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.1
+    hostname: 'elasticsearch.server'
+    labels:
+      - "com.ouroboros.enable=false"
+      - "logspout.exclude=true"
+    environment:
+      bootstrap.memory_lock: 'false'
+      cluster.name: 'elk-docker-cluster'
+      network.host: '_eth0:ipv4_'
+      #      discovery.type: 'zen'
+      discovery.type: 'single-node'
+      node.name: 'elasticsearch.server'
+      #      cluster.initial_master_nodes: 'elasticsearch.server'
+      #      discovery.seed_hosts: 'elasticsearch.server,elasticsearch-slave.server'
+      ES_JAVA_OPTS: "${ELK_ES_JAVA_OPTS}"
+      ELASTICSEARCH_USERNAME: "${ELK_ELASTICSEARCH_USERNAME}"
+      ELASTIC_PASSWORD: "${ELK_ELASTIC_PASSWORD}"
+      http.cors.enabled: 'true'
+      http.cors.allow-origin: '*'
+      xpack.security.enabled: 'false'
+      xpack.monitoring.enabled: 'false'
+      xpack.watcher.enabled: 'false'
+      xpack.ml.enabled: 'false'
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "traefik.enable=false"
+        - "com.ouroboros.enable=false"
+        - "logspout.exclude=true"
+      resources:
+        limits:
+          memory: "${ELK_MEMORY_LIMIT}"
+    networks:
+      haakco-net:
+        aliases:
+          - elasticsearch.server
+          - es.server
+          - elasticsearch
+      traefik-net:
+        aliases:
+          - elasticsearch.server
+          - es.server
+          - elasticsearch
+    volumes:
+      - 'db_haakco_elasticsearch:/usr/share/elasticsearch/data'
+  elastichq:
+    image: 'elastichq/elasticsearch-hq'
+    hostname: "elastichq.server"
+    environment:
+      - 'HQ_DEFAULT_URL=http://elasticsearch.server:9200'
+    deploy:
+      restart_policy:
+        condition: any
+      labels:
+        - 'traefik.enable=true'
+        - "traefik.http.routers.elastichq.rule=Host(`elastichq.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.elastichq.entrypoints=websecure"
+        - "traefik.http.services.elastichq.loadbalancer.server.port=5000"
+        - "traefik.http.routers.elastichq.tls=true"
+        - "traefik.http.routers.elastichq.middlewares=elastichqauth"
+        - "traefik.http.middlewares.elastichqauth.basicauth.users=haakco:$$apr1$$nzSK8fmx$$ZJLXWY7EyMCwgYZNpF/Gz/"
+    networks:
+      haakco-net:
+        aliases:
+          - elastichq.server
+      traefik-net:
+        aliases:
+          - elastichq.server
+  logstash:
+    image: haakco/logstash:latest
+    hostname: "logstash.server"
+    environment:
+      LOGSPOUT: 'ignore'
+      ELK_ELASTICSEARCH_USERNAME: "${ELK_ELASTICSEARCH_USERNAME}"
+      ELK_ELASTIC_PASSWORD: "${ELK_ELASTIC_PASSWORD}"
+    labels:
+      - "traefik.enable=false"
+      - "logspout.exclude=true"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "traefik.enable=false"
+        - "logspout.exclude=true"
+    networks:
+      haakco-net:
+        aliases:
+          - logstash.server
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.6.1
+    hostname: "kibana.server"
+    labels:
+      - 'com.ouroboros.enable=false'
+    environment:
+      elasticsearch.hosts: 'http://elasticsearch.server:9200'
+      elasticsearch.password: "${ELK_ELASTIC_PASSWORD}"
+      elasticsearch.username: "${ELK_ELASTICSEARCH_USERNAME}"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - 'com.ouroboros.enable=false'
+        - 'traefik.enable=true'
+        - "traefik.http.routers.kibana.rule=Host(`kibana.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.kibana.entrypoints=websecure"
+        - "traefik.http.services.kibana.loadbalancer.server.port=5601"
+        - "traefik.http.routers.kibana.tls=true"
+        - "traefik.http.routers.kibana.middlewares=kibanaauth"
+        - "traefik.http.middlewares.kibanaauth.basicauth.users=haakco:$$apr1$$nzSK8fmx$$ZJLXWY7EyMCwgYZNpF/Gz/"
+    networks:
+      haakco-net:
+        aliases:
+          - kibana.server
+      traefik-net:
+        aliases:
+          - kibana.server
+  logspout:
+    image: bekt/logspout-logstash
+    hostname: "logspout.server"
+    depends_on:
+      - logstash
+    environment:
+      ROUTE_URIS: "logstash://logstash.server:4044"
+      EXCLUDE_LABEL: "logspout.exclude"
+    labels:
+      - "traefik.enable=false"
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+      labels:
+        - "traefik.enable=false"
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      haakco-net:
+        aliases:
+          - logspout.server
+networks:
+  haakco-net:
+    attachable: true
+    external: true
+    driver: overlay
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay
+volumes:
+  db_haakco_elasticsearch:
+    external: false
+    name: db_haakco_elasticsearch

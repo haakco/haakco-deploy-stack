@@ -1,0 +1,83 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+services:
+  traefik:
+    image: traefik
+    hostname: traefik.server
+    environment:
+      - 'TZ=Africa/Johannesburg'
+#      - "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
+#      - "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+#      - "AWS_REGION=${AWS_REGION}"
+#      - "AWS_HOSTED_ZONE_ID=${AWS_HOSTED_ZONE_ID}"
+    command:
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--providers.docker'
+      - '--api'
+      - '--accesslog=true'
+#      - '--certificatesresolvers.le.acme.email=acme@haak.co'
+#      - '--certificatesresolvers.le.acme.dnschallenge=true'
+#      - '--certificatesresolvers.le.acme.dnschallenge.provider=route53'
+#      - '--certificatesresolvers.le.acme.storage=/acme.json'
+      - '--providers.docker.exposedbydefault=false'
+      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
+      - '--providers.docker.swarmMode=true'
+      - '--providers.docker.network=traefik-net'
+      # Default TLS certificates must be specified in a file :sadface:
+      - "--providers.file.filename=/traefik/traefik.yaml"
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+      labels:
+        - 'traefik.enable=true'
+        # Dashboard
+        - 'traefik.http.routers.traefik.rule=Host(`traefik.${ADMIN_DOMAIN}`)'
+        - 'traefik.http.routers.traefik.entryPoints=websecure'
+        - 'traefik.http.routers.traefik.service=api@internal'
+        # Dummy service for Swarm port detection. The port can be any valid integer value.
+        - "traefik.http.services.traefik.loadbalancer.server.port=9999"
+        - 'traefik.http.routers.traefik.tls=true'
+        - 'traefik.http.routers.traefik.middlewares=authtraefik'
+        - "traefik.http.middlewares.authtraefik.basicauth.users=haakco:$$apr1$$nzSK8fmx$$ZJLXWY7EyMCwgYZNpF/Gz/"
+
+        # global redirect to https
+        - 'traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)'
+        - 'traefik.http.routers.http-catchall.entrypoints=web'
+        - 'traefik.http.routers.http-catchall.middlewares=redirect-to-https'
+
+        # middleware redirect
+        - 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https'
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      traefik-net:
+        aliases:
+          - traefik.server
+          - minio.${ADMIN_DOMAIN}
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - "${VOLUME_TRAEFIK_TRAEFIK_YAML}:/traefik/traefik.yaml"
+      - "${VOLUME_TRAEFIK_DIR_CERTIFICATE_PEM}:/ssl/certificate.pem"
+      - "${VOLUME_TRAEFIK_DIR_PRIVKEY_PEM}:/ssl/certificate.key"
+networks:
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay

@@ -1,0 +1,71 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+services:
+  agent:
+    image: portainer/agent
+    environment:
+      - 'TZ=Africa/Johannesburg'
+      - 'AGENT_CLUSTER_ADDR=portainer-agent.server'
+      - 'CAP_HOST_MANAGEMENT=1'
+      - "AGENT_SECRET=${PORTAINER_AGENT_SECRET}"
+      # - 'AGENT_PORT=9001'
+      # - 'LOG_LEVEL=debug'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+      - /:/host
+    networks:
+      haakco-net:
+        aliases:
+          - portainer-agent.server
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+      labels:
+        - "traefik.enable=false"
+  portainer:
+    image: portainer/portainer
+    environment:
+      - "AGENT_SECRET=${PORTAINER_AGENT_SECRET}"
+    command: -H tcp://portainer-agent.server:9001 --tlsskipverify
+    volumes:
+      - portainer_volume:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      haakco-net:
+        aliases:
+          - portainer.server
+      traefik-net:
+        aliases:
+          - portainer.server
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - 'traefik.enable=true'
+        - "traefik.http.routers.portainer.rule=Host(`portainer.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.portainer.entrypoints=websecure"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+        - "traefik.http.routers.portainer.tls=true"
+      placement:
+        constraints:
+          - 'node.role == manager'
+networks:
+  haakco-net:
+    attachable: true
+    driver: overlay
+    external: true
+  traefik-net:
+    attachable: true
+    driver: overlay
+    external: true
+volumes:
+  portainer_volume:
+    external: false
+    name: portainer_volume
