@@ -182,7 +182,7 @@ Though I haven't had time to test and confirm yet or find a replacement.
 
 ## The basic swarm management and overview
 
-Using Portainer for this. Please remember to change your password immediately after deploy.
+Using (Portainer)[https://www.portainer.io/] for this. Please remember to change your password immediately after deploy.
 
 I previously had this set via an environmental variable, but it had some strange problems.
 
@@ -190,24 +190,25 @@ Still need to re-visit and find a solution. (Maybe fixed as haven't tested in a 
 
 ## HTTP Load balancing (SSL cert generation)
 
-This will be done with traefik. It will also generate letsencrypt certs.
+This will be done with (traefik)[https://containo.us/traefik/]. It will also generate
+(letsencrypt certs)[https://letsencrypt.org/].
 
 You are able to provide your own certificates buy changing the config and adding them to your
 volume mounts.
 
 ## Frontend HTML
 
-The frontend is current written in Angular.
+The frontend is current written in (Angular)[https://angular.io/].
 
 As mentioned in the far future I would also like to add some other frontend technologies once
 I've stabilised the basic API.
 
-This will most likely at least be ReactJs and possibly Vue.
+This will most likely at least be (ReactJs)[https://vuejs.org/] and possibly (Vue)[https://vuejs.org/].
 
 **Help here would be appreciated. No requirement on the above technologies the more the
 merrier :). Happy to point to external repositories**
 
-I'll also most likely be adding and Ionic frontend for Android and IOS.
+I'll also most likely be adding and (Ionic)[https://ionicframework.com/] frontend for Android and IOS.
 
 Main reason for Ionic is the quiet a bit of the Angular code base can just be re-used as is.
 
@@ -219,7 +220,7 @@ merrier :). Happy to point to external repositories**
 
 ## Api Documentation
 
-The Api wil be documented in OpenAPI. Currently, it's sitting here:
+The Api wil be documented in (OpenAPI)[https://swagger.io/docs/specification/about/]. Currently, it's sitting here:
 [Api Documentation](https://app.swaggerhub.com/apis/HaakCo/HaakCo/1.0.1)
 
 The plan is to move this inside the code base and have it display on a route endpoint,
