@@ -179,7 +179,7 @@ I previously had this set via an environmental variable, but it had some strange
 
 Still need to re-visit and find a solution. (Maybe fixed as haven't tested in a while)
 
-## HTTP Load balancing (SSl cert generation)
+## HTTP Load balancing (SSL cert generation)
 
 This will be done with traefik. It will also generate letsencrypt certs.
 
@@ -278,7 +278,7 @@ The current deploy repository has some dev certs in already for you which you ca
 The certs are for dev.haak.co and *.dev.haak.co which point at localhost to make life easier for
 testing.
 
-To my knowledge it should be safe to have these public. Though it may not so be prepared to have
+To my knowledge it should be safe to have these public. Though it may not, so be prepared to have
 them removed and invalidated.
 
 You are able to generate your own certs though it requires that you have your own DNS server.
@@ -301,8 +301,7 @@ Ok we are now close to being done.
 
 The next is the config for your actual system.
 
-Most setting can be left as is. The following are ones that your are most likely going to n
-eed to change.
+Most setting can be left as is. The following are ones that your are most likely going to need to change.
 
 All setting are done in the **runAll.sh** file.
 
