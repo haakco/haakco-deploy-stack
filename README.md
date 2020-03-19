@@ -137,7 +137,7 @@ The main API code is written in PHP using the [Laravel](https://laravel.com/) fr
 
 ### DB
 
-The DB is (PostgreSQL)[https://www.postgresql.org/].
+The DB is [PostgreSQL](https://www.postgresql.org/).
 
 **I have the basic code and deployment for HA for production done just needs cleanup.**
 
