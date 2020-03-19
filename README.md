@@ -143,34 +143,34 @@ The DB is [PostgreSQL](https://www.postgresql.org/).
 
 ### Caching/Queuing
 
-Using (Redis)[https://redis.io/] for caching and queuing. Using the built in
-(queuing of Laravel)[https://laravel.com/docs/7.x/queues] and (Laravel Horizon)[https://laravel.com/docs/7.x/horizon].
+Using [Redis](https://redis.io/) for caching and queuing. Using the built in
+[queuing of Laravel](https://laravel.com/docs/7.x/queues) and [Laravel Horizon](https://laravel.com/docs/7.x/horizon).
 
 **Still need to put some work into the code to deploy a HA cluster for production.**
 
 ### Mail Relay
 
-Using (Postfix)[http://www.postfix.org/] for basic relaying and queuing of email. Though would highly recommend that you have an up stream relay
+Using [Postfix](http://www.postfix.org/) for basic relaying and queuing of email. Though would highly recommend that you have an up stream relay
 and don't send directly.
 
 The docker image can be configured to do both.
 
 ## Logging and Future search
 
-Using the (ELK stack)[https://www.elastic.co/what-is/elk-stack] for logging.
+Using the [ELK stack](https://www.elastic.co/what-is/elk-stack) for logging.
 
 Currently, not doing any searching in the main Laravel App,
 Though in future this will be done by Elastic.
 
 ## Basic application monitoring
 
-Currently, using (Laravel Telescope)[https://laravel.com/docs/7.x/telescope] to help with basic monitoring.
+Currently, using [Laravel Telescope](https://laravel.com/docs/7.x/telescope) to help with basic monitoring.
 
 ## File storage
 
-If you choose not to use cloud storage, then (MinIo)[https://min.io/] which will be the default.
+If you choose not to use cloud storage, then [MinIo](https://min.io/) which will be the default.
 
-Otherwise, you can either use Google Drive or (AWS S3)[https://aws.amazon.com/s3/].
+Otherwise, you can either use Google Drive or [AWS S3](https://aws.amazon.com/s3/).
 
 ## Container updating
 
