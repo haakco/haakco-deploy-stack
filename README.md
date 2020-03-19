@@ -179,7 +179,7 @@ I previously had this set via an environmental variable, but it had some strange
 
 Still need to re-visit and find a solution. (Maybe fixed as haven't tested in a while)
 
-## HTTP Load balancing (SSl cert generation)
+## HTTP Load balancing (SSL cert generation)
 
 This will be done with traefik. It will also generate letsencrypt certs.
 
