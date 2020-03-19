@@ -293,9 +293,9 @@ them removed and invalidated.
 
 You are able to generate your own certs though it requires that you have your own DNS server.
 
-If you don't I would recommend [CloudFlair](https://www.cloudflare.com/) as it's free to use.
+If you don't I would recommend [CloudFlare](https://www.cloudflare.com/) as it's free to use.
 
-There are example scripts for both AWS hosted DNS and [CloudFlair](https://www.cloudflare.com/)
+There are example scripts for both AWS hosted DNS and [CloudFlare](https://www.cloudflare.com/)
 hosted DNS.
 
 Just set your credential in the relevant file and update the scripts to your DNS settings.
@@ -539,8 +539,3 @@ It is high on my list once I have stabilised the API.
 
   * https://github.com/haakco/docker-nginx-alpine.git
     * https://hub.docker.com/repository/docker/haakco/logstash
-
-
-
-
-
