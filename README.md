@@ -278,7 +278,7 @@ The current deploy repository has some dev certs in already for you which you ca
 The certs are for dev.haak.co and *.dev.haak.co which point at localhost to make life easier for
 testing.
 
-To my knowledge it should be safe to have these public. Though it may not so be prepared to have
+To my knowledge it should be safe to have these public. Though it may not, so be prepared to have
 them removed and invalidated.
 
 You are able to generate your own certs though it requires that you have your own DNS server.
