@@ -301,8 +301,7 @@ Ok we are now close to being done.
 
 The next is the config for your actual system.
 
-Most setting can be left as is. The following are ones that your are most likely going to n
-eed to change.
+Most setting can be left as is. The following are ones that your are most likely going to need to change.
 
 All setting are done in the **runAll.sh** file.
 
