@@ -220,15 +220,17 @@ else
   eval "$(${DM} env ${DOCKER_MACHINE_API_REMOTE_NAME})"
 fi
 
-# Fix for strange docker for mac bug :(
-docker network prune -f
-docker system prune -f
+## Fix for strange docker for mac bug :(
+#docker network prune -f
+#docker system prune -f
 
-echo "waiting a bit for docker to realise the networks are removed"
-sleep 2
+#echo "waiting a bit for docker to realise the networks are removed"
+#sleep 2
 
 docker network create -d overlay --subnet=10.44.100.0/24 --attachable "${APP_NETWORK}" &
 docker network create -d overlay --subnet=10.44.2.0/24 --attachable "${TRAEFIK_NETWORK}" &
+
+sleep 2
 
 #docker plugin install rexray/s3fs \
 #  S3FS_OPTIONS="allow_other,use_path_request_style,nonempty,url=http://<minio_endpoint_url>" \

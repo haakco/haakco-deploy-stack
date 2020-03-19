@@ -483,6 +483,26 @@ It is high on my list once I have stabilised the API.
 
 # Links to all github repositories used in this project
 
+## Code and Scripts
+
+  * https://github.com/haakco/haakco-deploy-stack.git
+  * https://github.com/haakco/haakco-gui-ng.git
+  * https://github.com/haakco/haakco-api.git
+
+
+## Docker
+
+  * https://github.com/haakco/docker-logstash.git
+    * https://hub.docker.com/repository/docker/haakco/logstash
+
+  * https://github.com/haakco/docker-postfix-relay.git
+    * https://hub.docker.com/repository/docker/haakco/postfix-relay
+
+  * https://github.com/haakco/docker-postgres12.git
+    * https://hub.docker.com/repository/docker/haakco/postgres12
+
+  * https://github.com/haakco/docker-logstash.git
+    * https://hub.docker.com/repository/docker/haakco/logstash
 
 
 
