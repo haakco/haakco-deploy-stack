@@ -6,6 +6,7 @@ services:
       - "TZ=${TIME_ZONE}"
       - "INTERVAL=300"
       - "SELF_UPDATE=true"
+      - "LOG_LEVEL=info"
       - "CLEANUP=true"
       - "REPO_USER=${OUROBOROS_DOCKER_HUB_REPO_USER}"
       - "REPO_PASS=${OUROBOROS_DOCKER_HUB_REPO_PASS}"
