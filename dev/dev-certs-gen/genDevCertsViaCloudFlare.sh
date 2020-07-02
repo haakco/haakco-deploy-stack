@@ -14,7 +14,7 @@ mkdir -p "${LE_LIB_DIR}"
 #  certbot/dns-route53 certonly \
 # Remove old certs to get consisten file generation
 
-rm -rf "${LE_ETC_DIR}/live/"
+#rm -rf "${LE_ETC_DIR}/live/"
 
 docker run \
   --rm \
