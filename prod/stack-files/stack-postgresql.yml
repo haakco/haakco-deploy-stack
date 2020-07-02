@@ -1,0 +1,138 @@
+version: '3.7'
+services:
+  pgmaster:
+    image: postdock/postgres:latest
+    hostname: pgmaster.server
+    environment:
+      NODE_ID: 1 # Integer number of node (not required if can be extracted from NODE_NAME var, e.g. node-45 => 1045)
+      NODE_NAME: node1 # Node name
+      CLUSTER_NODE_NETWORK_NAME: pgmaster.server # (default: hostname of the node)
+
+      PARTNER_NODES: "pgmaster.server,pgslave-1.server"
+      REPLICATION_PRIMARY_HOST: pgmaster.server # That should be ignored on the same node
+
+      NODE_PRIORITY: 100  # (default: 100)
+      SSH_ENABLE: 0
+      #database we want to use for application
+      POSTGRES_PASSWORD: "kKNdgtok!7b9mCCL!ByY"
+      POSTGRES_USER: haakco
+      POSTGRES_DB: haakco
+      CLEAN_OVER_REWIND: 0
+      CONFIGS_DELIMITER_SYMBOL: ;
+      CONFIGS: "listen_addresses:'*';max_replication_slots:5"
+      # in format variable1:value1[,variable2:value2[,...]] if CONFIGS_DELIMITER_SYMBOL=, and CONFIGS_ASSIGNMENT_SYMBOL=:
+      # used for pgpool.conf file
+      #defaults:
+      CLUSTER_NAME: pg_cluster # default is pg_cluster
+      REPLICATION_DB: replication_db # default is replication_db
+      REPLICATION_USER: replication_user # default is replication_user
+      REPLICATION_PASSWORD: "GLTTZ-GmzP9NpVq@Y!k*" # default is replication_pass
+    ports:
+      - 5422:5432
+    volumes:
+      - haakco_pgmaster_vol:/var/lib/postgresql/data
+#      - ./ssh/:/tmp/.ssh/keys
+    networks:
+      haakco-net:
+        aliases:
+          - pgmaster.server
+  pgslave:
+    image: postdock/postgres:latest
+    hostname: pgslave-{{.Task.Slot}}.server
+    depends_on:
+      - pgmaster
+    environment:
+      NODE_ID: 2
+      NODE_NAME: node2
+      CLUSTER_NODE_NETWORK_NAME: pgslave-{{.Task.Slot}}.server # (default: hostname of the node)
+      SSH_ENABLE: 0
+      PARTNER_NODES: "pgmaster.server,pgslave-1.server"
+      REPLICATION_PRIMARY_HOST: pgmaster.server
+      CLEAN_OVER_REWIND: 1
+      CONFIGS_DELIMITER_SYMBOL: ;
+      CONFIGS: "max_replication_slots:10" #some overrides
+      CLUSTER_NAME: pg_cluster # default is pg_cluster
+      REPLICATION_DB: replication_db # default is replication_db
+      REPLICATION_USER: replication_user # default is replication_user
+      REPLICATION_PASSWORD: "GLTTZ-GmzP9NpVq@Y!k*" # default is replication_pass
+    ports:
+      - 5441:5432
+    volumes:
+      - haakco_pgslave1_vol:/var/lib/postgresql/data
+#      - ./ssh:/tmp/.ssh/keys
+    networks:
+      haakco-net:
+        aliases:
+          - pgslave-{{.Task.Slot}}.server
+  pgbackup:
+    image: postdock/barman:latest
+    hostname: pgbackup.server
+    depends_on:
+      - pgmaster
+      - pgslave
+    environment:
+      REPLICATION_USER: replication_user # default is replication_user
+      REPLICATION_PASSWORD: "GLTTZ-GmzP9NpVq@Y!k*" # default is replication_pass
+      REPLICATION_HOST: pgmaster.server
+      POSTGRES_PASSWORD: "kKNdgtok!7b9mCCL!ByY"
+      POSTGRES_USER: haakco
+      POSTGRES_DB: haakco
+      SSH_ENABLE: 0
+      BACKUP_SCHEDULE: "*/30 */5 * * *"
+    volumes:
+      - haakco_pgbackup_vol:/var/backups
+#      - ./ssh:/tmp/.ssh/keys
+    networks:
+      haakco-net:
+        aliases:
+          - backup
+  pgpool:
+    image: postdock/pgpool:latest
+    hostname: pgpool.server
+    depends_on:
+      - pgmaste
+      - pgslave
+    environment:
+      PCP_USER: pcp_user
+      PCP_PASSWORD: "oq@w6cUo3AMa6bb7DtPk"
+      WAIT_BACKEND_TIMEOUT: 60
+
+      CHECK_USER: haakco
+      CHECK_PASSWORD: "kKNdgtok!7b9mCCL!ByY"
+      CHECK_PGCONNECT_TIMEOUT: 3 #timout for checking if primary node is healthy
+      SSH_ENABLE: 0
+      DB_USERS: haakco:kKNdgtok!7b9mCCL!ByY # in format user:password[,user:password[...]]
+      BACKENDS: "0:pgmaster.server:5432:1:/var/lib/postgresql/data:ALLOW_TO_FAILOVER,1:pgslave-1.server::::" #,3:pgslave3::::,2:pgslave2::::,4:pgslaveDOES_NOT_EXIST::::
+        # in format num:host:port:weight:data_directory:flag[,...]
+        # defaults:
+        #   port: 5432
+        #   weight: 1
+      #   data_directory: /var/lib/postgresql/data
+      #   flag: ALLOW_TO_FAILOVER
+      REQUIRE_MIN_BACKENDS: 1 # minimal number of backends to start pgpool (some might be unreachable)
+      CONFIGS: "num_init_children:250,max_pool:4"
+      # in format variable1:value1[,variable2:value2[,...]] if CONFIGS_DELIMITER_SYMBOL=, and CONFIGS_ASSIGNMENT_SYMBOL=:
+      # used for pgpool.conf file
+    ports:
+      - 5432:5432
+      - 9898:9898 # PCP
+#    volumes:
+#      - ./ssh:/tmp/.ssh/keys
+    networks:
+      haakco-net:
+        aliases:
+          - pgpool.server
+networks:
+  haakco-net:
+    external: true
+    driver: overlay
+volumes:
+  haakco_pgmaster_vol:
+    external: false
+    name: haakco_pgmaster_vol
+  haakco_pgslave1_vol:
+    external: false
+    name: haakco_pgslave1_vol
+  haakco_pgbackup_vol:
+    external: false
+    name: haakco_pgbackup_vol

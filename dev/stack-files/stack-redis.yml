@@ -1,0 +1,80 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '10m'
+services:
+  redis:
+    image: redis
+    hostname: redis.server
+    environment:
+      - "TZ=${TIME_ZONE}"
+    command: [
+      "redis-server",
+      "--appendonly yes",
+    ]
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/module=redis"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=false"
+    volumes:
+      - "db_haak_redis:/data"
+    ports:
+      - "6379:6379"
+    networks:
+      haakco-net:
+        aliases:
+          - redis.server
+  rediscommander:
+    image: rediscommander/redis-commander:latest
+    hostname: rediscommander.server
+    environment:
+      - "TZ=${TIME_ZONE}"
+      - "REDIS_HOSTS=haakco:redis.server:6379"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=true"
+        - "traefik.http.routers.rediscommander.rule=Host(`rediscommander.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.rediscommander.entrypoints=websecure"
+        - "traefik.http.services.rediscommander.loadbalancer.server.port=8081"
+        - "traefik.http.routers.rediscommander.tls=true"
+        - "traefik.http.routers.rediscommander.middlewares=rediscommander-auth, rediscommander-compress"
+        - "traefik.http.middlewares.rediscommander-auth.basicauth.users=haakco:$$apr1$$nzSK8fmx$$ZJLXWY7EyMCwgYZNpF/Gz/"
+        - "traefik.http.middlewares.rediscommander-compress.compress=true"
+    networks:
+      haakco-net:
+        aliases:
+          - rediscommander.server
+      traefik-net:
+        aliases:
+          - rediscommander.server
+networks:
+  haakco-net:
+    attachable: true
+    external: true
+    driver: overlay
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay
+volumes:
+  db_haak_redis:
+    external: false
+    name: db_haak_redis

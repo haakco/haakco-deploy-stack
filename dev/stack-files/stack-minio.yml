@@ -1,0 +1,59 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '10m'
+services:
+  minio:
+    image: minio/minio
+    hostname: minio.server
+    command:
+      - "server"
+      - "--json"
+      - "/data"
+    environment:
+      - "TZ=${TIME_ZONE}"
+      - "MINIO_DOMAIN=minio.${ADMIN_DOMAIN}"
+      - "MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}"
+      - "MINIO_SECRET_KEY=${MINIO_SECRET_KEY}"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=true"
+        - "traefik.http.routers.minio.rule=Host(`minio.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.minio.entrypoints=websecure"
+        - "traefik.http.services.minio.loadbalancer.server.port=9000"
+        - "traefik.http.routers.minio.tls=true"
+        - "traefik.http.routers.minio.middlewares=minio-compress"
+        - "traefik.http.middlewares.minio-compress.compress=true"
+    ports:
+      - "${MINIO_PORT}:9000"
+    volumes:
+      - "db_minio_vol:/data"
+    networks:
+      haakco-net:
+        aliases:
+          - "minio.server"
+      traefik-net:
+        aliases:
+          - "minio.server"
+networks:
+  haakco-net:
+    external: true
+    driver: overlay
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay
+volumes:
+  db_minio_vol:
+    external: false
+    name: db_minio_vol

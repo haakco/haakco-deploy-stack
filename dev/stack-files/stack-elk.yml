@@ -1,0 +1,118 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '10m'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+    hostname: 'elasticsearch.server'
+    environment:
+      bootstrap.memory_lock: 'false'
+      cluster.name: 'elk-docker-cluster'
+      network.host: '_site_'
+      #      discovery.type: 'zen'
+      discovery.type: 'single-node'
+      node.name: 'elasticsearch.server'
+      #      cluster.initial_master_nodes: 'elasticsearch.server'
+      #      discovery.seed_hosts: 'elasticsearch.server,elasticsearch-slave.server'
+      ES_JAVA_OPTS: "${ELK_ES_JAVA_OPTS}"
+      ELASTICSEARCH_USERNAME: "${ELK_ELASTICSEARCH_USERNAME}"
+      ELASTIC_PASSWORD: "${ELK_ELASTIC_PASSWORD}"
+      http.cors.enabled: 'true'
+      http.cors.allow-origin: '*'
+      xpack.security.enabled: 'true'
+      xpack.ml.enabled: 'true'
+      xpack.monitoring.enabled: 'true'
+      xpack.monitoring.collection.enabled: 'true'
+      xpack.monitoring.elasticsearch.collection.enabled: 'true'
+      xpack.watcher.enabled: 'true'
+      xpack.graph.enabled: 'true'
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/module=elasticsearch"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-net"
+        - "traefik.http.routers.elastic.rule=Host(`elastic.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.elastic.entrypoints=websecure"
+        - "traefik.http.services.elastic.loadbalancer.server.port=9200"
+        - "traefik.http.services.elastic.loadbalancer.passhostheader=true"
+        - "traefik.http.routers.elastic.tls=true"
+        - "traefik.http.routers.elastic.middlewares=elastic-compress"
+        - "traefik.http.middlewares.elastic-compress.compress=true"
+      resources:
+        limits:
+          memory: "${ELK_MEMORY_LIMIT}"
+    networks:
+      haakco-net:
+        aliases:
+          - elasticsearch.server
+          - es.server
+          - elasticsearch
+      traefik-net:
+        aliases:
+          - elasticsearch.server
+          - es.server
+          - elasticsearch
+    volumes:
+      - "db_haakco_elasticsearch:/usr/share/elasticsearch/data"
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.8.0
+    hostname: "kibana.server"
+    environment:
+      ELASTICSEARCH_HOSTS: 'http://elasticsearch.server:9200'
+      elasticsearch.hosts: 'http://elasticsearch.server:9200'
+      ELASTICSEARCH_PASSWORD: "${ELK_ELASTIC_PASSWORD}"
+      elasticsearch.password: "${ELK_ELASTIC_PASSWORD}"
+      ELASTICSEARCH_USERNAME: "${ELK_ELASTICSEARCH_USERNAME}"
+      elasticsearch.username: "${ELK_ELASTICSEARCH_USERNAME}"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/module=kibana"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-net"
+        - "traefik.http.routers.kibana.rule=Host(`kibana.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.kibana.entrypoints=websecure"
+        - "traefik.http.services.kibana.loadbalancer.server.port=5601"
+        - "traefik.http.routers.kibana.tls=true"
+        - "traefik.http.routers.kibana.middlewares=kibana-compress"
+        - "traefik.http.middlewares.kibana-compress.compress=true"
+    networks:
+      haakco-net:
+        aliases:
+          - kibana.server
+      traefik-net:
+        aliases:
+          - kibana.server
+networks:
+  haakco-net:
+    attachable: true
+    external: true
+    driver: overlay
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay
+volumes:
+  db_haakco_elasticsearch:
+    external: false
+    name: db_haakco_elasticsearch

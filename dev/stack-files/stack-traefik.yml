@@ -1,0 +1,121 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '10m'
+services:
+  traefik:
+    image: traefik
+    hostname: traefik.server
+    environment:
+      - "TZ=${TIME_ZONE}"
+    #      - "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
+    #      - "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+    #      - "AWS_REGION=${AWS_REGION}"
+    #      - "AWS_HOSTED_ZONE_ID=${AWS_HOSTED_ZONE_ID}"
+    #      - "CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}"
+    command:
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.wss.address=:6001"
+      - "--entryPoints.websecure.proxyProtocol.insecure=true"
+      - >-
+        --entryPoints.websecure.proxyProtocol.trustedIPs=127.0.0.1,10.10.0.0/16,172.17.0.0/12,173.245.48.0/20,103.21.244.0/22,
+        103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,
+        198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,
+        2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32
+      - "--entryPoints.websecure.forwardedHeaders.insecure=true"
+      - >-
+        --entryPoints.websecure.forwardedHeaders.trustedIPs=127.0.0.1,10.10.0.0/16,172.17.0.0/12,173.245.48.0/20,103.21.244.0/22,
+        103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,
+        198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,
+        2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32
+      - "--providers.docker"
+      - "--api"
+      #      - "--certificatesresolvers.le.acme.email=acme@haak.co"
+      #      - "--certificatesresolvers.le.acme.dnschallenge=true"
+      #      - "--certificatesresolvers.le.acme.dnschallenge.provider=route53"
+      #      - "--certificatesresolvers.le.acme.dnschallenge.provider=cloudflare"
+      #      - "--certificatesresolvers.le.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      #      - "--certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=10"
+      #      - "--certificatesresolvers.le.acme.storage=/acme.json"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.network=traefik-net"
+      - "--providers.docker.watch=true"
+      - "--accesslog=true"
+      - "--accessLog.fields.defaultmode=keep"
+      - "--accessLog.fields.names.ClientUsername=keep"
+      - "--accessLog.fields.headers.defaultmode=keep"
+      - "--accessLog.fields.headers.names.User-Agent=keep"
+      - "--accessLog.fields.headers.names.Authorization=keep"
+      - "--accessLog.fields.headers.names.Content-Type=keep"
+      # Default TLS certificates must be specified in a file :sadface:
+      - "--providers.file.filename=/traefik/traefik.yaml"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/module=traefik"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-net"
+        # Dashboard
+        - "traefik.http.routers.traefik.rule=Host(`traefik.${ADMIN_DOMAIN}`)"
+        - "traefik.http.routers.traefik.entryPoints=websecure"
+        - "traefik.http.routers.traefik.service=api@internal"
+        # Dummy service for Swarm port detection. The port can be any valid integer value.
+        - "traefik.http.services.traefik.loadbalancer.server.port=9999"
+        - "traefik.http.routers.traefik.tls=true"
+        #        - "traefik.http.routers.traefik.tls.certresolver=le"
+
+        - "traefik.http.routers.traefik.middlewares=authtraefik, traefik-compress"
+        - "traefik.http.middlewares.authtraefik.basicauth.users=haakco:$$apr1$$nzSK8fmx$$ZJLXWY7EyMCwgYZNpF/Gz/"
+        - "traefik.http.middlewares.traefik-compress.compress=true"
+
+        # global redirect to https
+        - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+        - "traefik.http.routers.http-catchall.entrypoints=web"
+        - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+
+        # middleware redirect
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+    networks:
+      traefik-net:
+        aliases:
+          - traefik.server
+          - minio.${ADMIN_DOMAIN}
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 6001
+        published: 6001
+        protocol: tcp
+        mode: host
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${VOLUME_TRAEFIK_TRAEFIK_YAML}:/traefik/traefik.yaml"
+      - "${VOLUME_TRAEFIK_DIR_CERTIFICATE_PEM}:/ssl/certificate.pem"
+      - "${VOLUME_TRAEFIK_DIR_PRIVKEY_PEM}:/ssl/certificate.key"
+networks:
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay

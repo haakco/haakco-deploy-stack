@@ -1,0 +1,43 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '10m'
+services:
+  mail-relay:
+    image: haakco/postfix-relay
+    hostname: mail.server
+    environment:
+      - "TZ=${TIME_ZONE}"
+      - "SMTP_USER=${MAIL_RELAY_SMTP_USER_NAME}"
+      - "SMTP_PASS=${MAIL_RELAY_SMTP_PASS}"
+      - "RELAY_HOST=[${MAIL_RELAY_HOST}]:${MAIL_RELAY_PORT}"
+      - "MY_DOMAIN=${MAIL_RELAY_DOMAIN}"
+      - "ALLOWED_SENDER_DOMAINS=${MAIL_RELAY_ALLOWED_SENDER_DOMAINS}"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=false"
+    volumes:
+      - "mail-relay-volume:/data:delegated"
+    networks:
+      haakco-net:
+        aliases:
+          - mail.server
+networks:
+  haakco-net:
+    external: true
+    driver: overlay
+volumes:
+  mail-relay-volume:
+    external: true
+    name: mail-relay-volume

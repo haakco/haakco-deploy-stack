@@ -1,0 +1,77 @@
+version: '3.7'
+x-default-opts:
+  &default-opts
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '10m'
+services:
+  laravel-echo-server:
+    image: haakco/laravel-echo-server:latest
+    hostname: "laravel-echo-server.server"
+    #    command: "/testLoop.sh"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=true"
+        - "traefik.http.services.echo.loadbalancer.server.port=6001"
+        - "traefik.http.routers.echo.rule=Host(`${DNS_DOMAIN}`)"
+        - "traefik.http.routers.echo.entrypoints=wss"
+        - "traefik.http.routers.echo.tls=true"
+
+        # set https header
+        - "traefik.http.routers.echo.middlewares=sslheader"
+        - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+    environment:
+      - "LARAVEL_ECHO_AUTH_HOST=${LARAVEL_ECHO_AUTH_HOST}"
+      - "LARAVEL_ECHO_AUTH_ENDPOINT=${LARAVEL_ECHO_AUTH_ENDPOINT}"
+      - "LARAVEL_ECHO_CLIENTS=${LARAVEL_ECHO_CLIENTS}"
+      - "LARAVEL_ECHO_DB_TYPE=${LARAVEL_ECHO_DB_TYPE}"
+      - "LARAVEL_ECHO_DB_CONFIG_REDIS_HOST=${LARAVEL_ECHO_DB_CONFIG_REDIS_HOST}"
+      - "LARAVEL_ECHO_DB_CONFIG_REDIS_PORT=${LARAVEL_ECHO_DB_CONFIG_REDIS_PORT}"
+      - "LARAVEL_ECHO_DB_CONFIG_REDIS_KEY_PREFIX=${LARAVEL_ECHO_DB_CONFIG_REDIS_KEY_PREFIX}"
+      - "LARAVEL_ECHO_DB_CONFIG_REDIS_OPTIONS_DB_BACKEND=${LARAVEL_ECHO_DB_CONFIG_REDIS_OPTIONS_DB_BACKEND}"
+      - "LARAVEL_ECHO_DB_CONFIG_SQLITE_DB_PATH=${LARAVEL_ECHO_DB_CONFIG_SQLITE_DB_PATH}"
+      - "LARAVEL_ECHO_DB_CONFIG_PUBLISH_PRESENCE=${LARAVEL_ECHO_DB_CONFIG_PUBLISH_PRESENCE}"
+      - "LARAVEL_ECHO_DEV_MODE=${LARAVEL_ECHO_DEV_MODE}"
+      - "LARAVEL_ECHO_HOST=${LARAVEL_ECHO_HOST}"
+      - "LARAVEL_ECHO_PORT=${LARAVEL_ECHO_PORT}"
+      - "LARAVEL_ECHO_PROTO=${LARAVEL_ECHO_PROTO}"
+      - "LARAVEL_ECHO_SUBSCRIBERS_HTTP=${LARAVEL_ECHO_SUBSCRIBERS_HTTP}"
+      - "LARAVEL_ECHO_SUBSCRIBERS_REDIS=${LARAVEL_ECHO_SUBSCRIBERS_REDIS}"
+      - "LARAVEL_ECHO_API_ORIGIN_ALLOW_CORS=${LARAVEL_ECHO_API_ORIGIN_ALLOW_CORS}"
+      - "LARAVEL_ECHO_API_ORIGIN_ALLOW_ORIGIN=${LARAVEL_ECHO_API_ORIGIN_ALLOW_ORIGIN}"
+      - "LARAVEL_ECHO_API_ORIGIN_ALLOW_METHODS=${LARAVEL_ECHO_API_ORIGIN_ALLOW_METHODS}"
+      - "LARAVEL_ECHO_API_ORIGIN_ALLOW_HEADERS=${LARAVEL_ECHO_API_ORIGIN_ALLOW_HEADERS}"
+#    ports:
+#      - "6001:6001"
+    networks:
+      haakco-net:
+        aliases:
+          - laravel-echo-server.server
+      traefik-net:
+        aliases:
+          - laravel-echo-server.server
+networks:
+  haakco-net:
+    attachable: true
+    external: true
+    driver: overlay
+  traefik-net:
+    attachable: true
+    external: true
+    driver: overlay
+volumes:
+  api_nfs:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":${VOLUME_LARAVEL_API}"

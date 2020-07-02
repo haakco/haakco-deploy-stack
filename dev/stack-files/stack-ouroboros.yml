@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+  ouroboros:
+    image: pyouroboros/ouroboros
+    environment:
+      - "TZ=${TIME_ZONE}"
+      - "INTERVAL=300"
+      - "SELF_UPDATE=true"
+      - "CLEANUP=true"
+      - "REPO_USER=serverhaakco"
+      - "REPO_PASS=lEyoUSCitalTIoli"
+      - "LABEL_ENABLE=true"
+      - "slack://hooks.slack.com/services/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"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=false"
+      placement:
+        constraints:
+          - node.role == manager
