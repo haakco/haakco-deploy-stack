@@ -20,7 +20,7 @@ services:
       #      discovery.seed_hosts: 'elasticsearch.server,elasticsearch-slave.server'
       ES_JAVA_OPTS: "${ELK_ES_JAVA_OPTS}"
       ELASTICSEARCH_USERNAME: "${ELK_ELASTICSEARCH_USERNAME}"
-      ELASTIC_PASSWORD: "${ELK_ELASTIC_PASSWORD}"
+      ELASTIC_PASSWORD: "${ELK_ELASTICSEARCH_PASSWORD}"
       http.cors.enabled: 'true'
       http.cors.allow-origin: '*'
       xpack.security.enabled: 'true'
