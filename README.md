@@ -559,12 +559,10 @@ These base images should be auto rebuild weekly to make sure they stay up to dat
 This image is basically only used to serve the static files.
 
   * https://github.com/haakco/docker-nginx-alpine.git
-    * https://hub.docker.com/repository/docker/haakco/logstash
 
 ## Other images for the stack files
 
   * https://github.com/haakco/docker-logstash.git
-    * https://hub.docker.com/repository/docker/haakco/logstash
 
   * https://github.com/haakco/docker-postfix-relay.git
     * https://hub.docker.com/repository/docker/haakco/postfix-relay
@@ -573,4 +571,3 @@ This image is basically only used to serve the static files.
     * https://hub.docker.com/repository/docker/haakco/postgres12
 
   * https://github.com/haakco/docker-logstash.git
-    * https://hub.docker.com/repository/docker/haakco/logstash
