@@ -67,50 +67,6 @@ services:
           - elasticsearch
     volumes:
       - "db_haakco_elasticsearch:/usr/share/elasticsearch/data"
-  filbeat:
-    image: docker.elastic.co/beats/filebeat:7.8.0
-    hostname: 'filebeat.server'
-    command: filebeat -e -strict.perms=false
-    environment:
-      output.elasticsearch.hosts: ['http://elasticsearch.server:9200']
-    labels:
-      - "co.elastic.logs/enabled=true"
-      - "co.elastic.logs/module=elasticsearch"
-      - "co.elastic.logs/fileset.stdout=access"
-      - "co.elastic.logs/fileset.stderr=error"
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: any
-      labels:
-        - "com.ouroboros.enable=true"
-        - "traefik.enable=true"
-        - "traefik.docker.network=traefik-net"
-        - "traefik.http.routers.elastic.rule=Host(`elastic.${ADMIN_DOMAIN}`)"
-        - "traefik.http.routers.elastic.entrypoints=websecure"
-        - "traefik.http.services.elastic.loadbalancer.server.port=9200"
-        - "traefik.http.services.elastic.loadbalancer.passhostheader=true"
-        - "traefik.http.routers.elastic.tls=true"
-        - "traefik.http.routers.elastic.middlewares=elastic-compress"
-        - "traefik.http.middlewares.elastic-compress.compress=true"
-      resources:
-        limits:
-          memory: "${ELK_MEMORY_LIMIT}"
-    networks:
-      haakco-net:
-        aliases:
-          - elasticsearch.server
-          - es.server
-          - elasticsearch
-      traefik-net:
-        aliases:
-          - elasticsearch.server
-          - es.server
-          - elasticsearch
-    volumes:
-      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
   kibana:
     image: docker.elastic.co/kibana/kibana:7.8.0
     hostname: "kibana.server"
@@ -147,6 +103,38 @@ services:
       traefik-net:
         aliases:
           - kibana.server
+  filbeat:
+    image: haakco/filebeat-swarm
+    hostname: 'filebeat.server'
+    user: root
+    command: filebeat -e -strict.perms=false
+    environment:
+      ELK_ELASTIC_PASSWORD: "${ELK_ELASTIC_PASSWORD}"
+      ELK_ELASTICSEARCH_USERNAME: "${ELK_ELASTICSEARCH_USERNAME}"
+    labels:
+      - "co.elastic.logs/enabled=true"
+      - "co.elastic.logs/fileset.stdout=access"
+      - "co.elastic.logs/fileset.stderr=error"
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+      labels:
+        - "com.ouroboros.enable=true"
+        - "traefik.enable=false"
+    networks:
+      haakco-net:
+        aliases:
+          - filebeat.server
+          - filebeat
+      traefik-net:
+        aliases:
+          - filebeat.server
+          - filebeat
+    volumes:
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 networks:
   haakco-net:
     attachable: true
