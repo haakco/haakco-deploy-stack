@@ -12,7 +12,6 @@ services:
 #    command: "/testLoop.sh"
     environment:
       - "APP_ENV=${API_APP_ENV}"
-      - "APP_IP_AUTHED_LIST=${API_APP_IP_AUTHED_LIST}"
       - "CRONTAB_ACTIVE=${API_CRONTAB_ACTIVE}"
       - "ENABLE_HORIZON=${API_ENABLE_HORIZON}"
       ## Defaults true !!!
@@ -82,9 +81,10 @@ services:
       - "LVENV_HAAK_ADMIN_USERNAME=${API_HAAK_ADMIN_USERNAME}"
       - "LVENV_HAAK_ADMIN_EMAIL=${API_HAAK_ADMIN_EMAIL}"
       - "LVENV_HAAK_ADMIN_PASSWORD=${API_HAAK_ADMIN_PASSWORD}"
-      - "LVENV_SERVER_ADMIN_EMAIL_NAME=${API_HAAK_SERVER_ADMIN_EMAIL_NAME}"
+      - "LVENV_HAAK_SERVER_ADMIN_EMAIL_NAME=${API_HAAK_SERVER_ADMIN_EMAIL_NAME}"
       - "LVENV_HAAK_SERVER_ADMIN_EMAIL=${API_HAAK_SERVER_ADMIN_EMAIL}"
       - "LVENV_HAAK_REGISTRATION_ENABLED=${API_HAAK_REGISTRATION_ENABLED}"
+      - "LVENV_HAAK_IP_AUTHED_LIST=${API_HAAK_IP_AUTHED_LIST}"
       - "LVENV_HORIZON_WORKERS=${API_HORIZON_WORKERS}"
       - "LVENV_HORIZON_LONG_RUNNING_WORKERS=${API_HORIZON_LONG_RUNNING_WORKERS}"
       - "LVENV_HORIZON_ROUTE=${API_HORIZON_ROUTE}"
@@ -164,7 +164,7 @@ services:
       labels:
         - "com.ouroboros.enable=true"
         - "traefik.enable=true"
-        - "traefik.http.routers.laravel.rule=Host(`${DNS_DOMAIN}`) && PathPrefix(`/api/v1`)"
+        - "traefik.http.routers.laravel.rule=Host(`${DNS_DOMAIN}`) && PathPrefix(`/api/v1`, `/vendor`)"
         - "traefik.http.routers.laravel.priority=10000"
         - "traefik.http.routers.laravel.entrypoints=websecure"
         - "traefik.http.services.laravel.loadbalancer.server.port=80"
