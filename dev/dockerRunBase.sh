@@ -23,9 +23,9 @@ export OUROBOROS_NOTIFIERS=${OUROBOROS_NOTIFIERS:-""}
 export API_USE_NFS_MOUNT=${API_USE_NFS_MOUNT:-"FALSE"}
 
 export API_HAAK_COMPANY_NAME=${API_HAAK_COMPANY_NAME:-"HaakCo"}
-export API_HAAK_ADMIN_USER=${API_HAAK_ADMIN_USER:-"Tim Haak"}
-export API_HAAK_ADMIN_USER_NAME=${API_HAAK_ADMIN_USER_NAME:-"timhaak"}
-export API_HAAK_ADMIN_EMAIL=${API_HAAK_ADMIN_EMAIL:-"tim@haak.co"}
+export API_HAAK_ADMIN_USER=${API_HAAK_ADMIN_USER:-"Admin User"}
+export API_HAAK_ADMIN_USERNAME=${API_HAAK_ADMIN_USERNAME:-"adminuser"}
+export API_HAAK_ADMIN_EMAIL=${API_HAAK_ADMIN_EMAIL:-"admin@example.com"}
 export API_HAAK_ADMIN_PASSWORD=${API_HAAK_ADMIN_PASSWORD:-"RuexVeQEvdDNCP"}
 export API_HAAK_SERVER_ADMIN_EMAIL_NAME=${API_HAAK_SERVER_ADMIN_EMAIL_NAME:-"Server Admin"}
 export API_HAAK_SERVER_ADMIN_EMAIL=${API_HAAK_SERVER_ADMIN_EMAIL:-"serveradmin@haak.co"}
@@ -133,6 +133,7 @@ export API_APP_NAME=${API_APP_NAME:-"${APP_NAME}"}
 export API_APP_ENV=${API_APP_ENV:-'local'}
 export API_APP_KEY=${API_APP_KEY:-'base64:2SApI6daXpA8MIDOaOSy6Y9THKwy0Q+K6YLMOH+m6+A='}
 export API_APP_URL=${API_APP_URL:-"https://${DNS_DOMAIN}"}
+export API_APP_IP_AUTHED_LIST=${API_APP_IP_AUTHED_LIST:-"127.0.0.1,::1"}
 export API_HAAK_SHORT_URL=${API_HAAK_SHORT_URL:-"${API_APP_URL}"}
 export API_APP_DEBUG=${API_APP_DEBUG:-"true"}
 export API_RESPONSE_CACHE_ENABLED=${API_RESPONSE_CACHE_ENABLED:-"true"}
@@ -316,7 +317,7 @@ docker stack deploy --compose-file ./stack-files/stack-redis.yml --prune --with-
 docker stack deploy --compose-file ./stack-files/stack-minio.yml --prune --with-registry-auth "${APP_NAME}-minio" &
 
 if [[ "${API_USE_NFS_MOUNT}" = "TRUE" ]]; then
-  docker stack deploy --compose-file ./stack-files/stack-laravel-api-nfs.yml --prune --with-registry-auth "${APP_NAME}-nfs-laravel-api" &
+  docker stack deploy --compose-file ./stack-files/stack-laravel-api-nfs.yml --prune --with-registry-auth "${APP_NAME}-laravel-api-nfs" &
 else
   ## Clean up link to nfs volume other wise if location is changed it doesn't update
   docker volume rm haakco-laravel-nfs_api_nfs

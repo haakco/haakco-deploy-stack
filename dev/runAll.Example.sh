@@ -9,6 +9,13 @@ export APP_NAME='haakco'
 export API_HAAK_COMPANY_NAME="HaakCo"
 export DNS_DOMAIN='dev.haak.co'
 export API_APP_URL="https://${DNS_DOMAIN}"
+export API_APP_ENV="development"
+export API_APP_IP_AUTHED_LIST="127.0.0.1,::1"
+
+export API_HAAK_ADMIN_USER="Admin User"
+export API_HAAK_ADMIN_USERNAME="adminuser"
+export API_HAAK_ADMIN_EMAIL="admin@example.com"
+export API_HAAK_ADMIN_PASSWORD="RuexVeQEvdDNCP"
 
 export DOCKER_HUB_USER=""
 export DOCKER_HUB_PASS=""
