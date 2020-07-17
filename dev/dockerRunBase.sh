@@ -315,10 +315,30 @@ sleep 5
 #  S3FS_ACCESSKEY="<minio_accesskey>" \
 #  S3FS_SECRETKEY="<minio_secretkey>"
 
+
+
+echo "Start Logging First"
+docker stack deploy --compose-file ./stack-files/stack-elk.yml --prune --with-registry-auth "${APP_NAME}-elk" &
+
+echo "Waiting for logging before starting"
+sleep 2
+
 docker stack deploy --compose-file ./stack-files/stack-traefik.yml --prune --with-registry-auth "${APP_NAME}-traefik" &
 docker stack deploy --compose-file ./stack-files/stack-postgresql.yml --prune --with-registry-auth "${APP_NAME}-postgres" &
 docker stack deploy --compose-file ./stack-files/stack-redis.yml --prune --with-registry-auth "${APP_NAME}-redis" &
 docker stack deploy --compose-file ./stack-files/stack-minio.yml --prune --with-registry-auth "${APP_NAME}-minio" &
+
+docker stack deploy --compose-file ./stack-files/stack-mail-relay.yml --prune --with-registry-auth "${APP_NAME}-mail-relay" &
+docker stack deploy --compose-file ./stack-files/stack-portainer.yml --prune --with-registry-auth "${APP_NAME}-portainer" &
+
+docker stack deploy --compose-file ./stack-files/stack-ouroboros.yml --prune --with-registry-auth "${APP_NAME}-ouroboros" &
+
+echo "Starting servers in 2 seconds last to give everything else a bit of time to start"
+sleep 2
+
+if [[ "${ENABLE_LARAVEL_ECHO_SERVER}" = "TRUE" ]]; then
+  docker stack deploy --compose-file ./stack-files/stack-laravel-echo.yml --prune --with-registry-auth "${APP_NAME}-laravel-echo" &
+fi
 
 if [[ "${API_USE_NFS_MOUNT}" = "TRUE" ]]; then
   docker stack deploy --compose-file ./stack-files/stack-laravel-api-nfs.yml --prune --with-registry-auth "${APP_NAME}-laravel-api-nfs" &
@@ -328,16 +348,3 @@ else
   sleep 1
   docker stack deploy --compose-file ./stack-files/stack-laravel-api.yml --prune --with-registry-auth "${APP_NAME}-laravel-api" &
 fi
-
-docker stack deploy --compose-file ./stack-files/stack-mail-relay.yml --prune --with-registry-auth "${APP_NAME}-mail-relay" &
-docker stack deploy --compose-file ./stack-files/stack-portainer.yml --prune --with-registry-auth "${APP_NAME}-portainer" &
-
-docker stack deploy --compose-file ./stack-files/stack-ouroboros.yml --prune --with-registry-auth "${APP_NAME}-ouroboros" &
-
-if [[ "${ENABLE_LARAVEL_ECHO_SERVER}" = "TRUE" ]]; then
-  docker stack deploy --compose-file ./stack-files/stack-laravel-echo.yml --prune --with-registry-auth "${APP_NAME}-laravel-echo" &
-fi
-
-echo "waiting a bit before starting logging"
-sleep 5
-docker stack deploy --compose-file ./stack-files/stack-elk.yml --prune --with-registry-auth "${APP_NAME}-elk" &
