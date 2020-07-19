@@ -321,7 +321,7 @@ echo "Start Logging First"
 docker stack deploy --compose-file ./stack-files/stack-elk.yml --prune --with-registry-auth "${APP_NAME}-elk" &
 
 echo "Waiting for logging before starting"
-sleep 2
+sleep 1
 
 docker stack deploy --compose-file ./stack-files/stack-traefik.yml --prune --with-registry-auth "${APP_NAME}-traefik" &
 docker stack deploy --compose-file ./stack-files/stack-postgresql.yml --prune --with-registry-auth "${APP_NAME}-postgres" &
