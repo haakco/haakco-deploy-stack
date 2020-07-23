@@ -39,5 +39,5 @@ networks:
     driver: overlay
 volumes:
   mail-relay-volume:
-    external: true
-    name: mail-relay-volume
+    external: false
+    name: "${VOLUME_MAIL_RELAY}"

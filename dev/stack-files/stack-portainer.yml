@@ -78,4 +78,4 @@ networks:
 volumes:
   portainer_volume:
     external: false
-    name: portainer_volume
+    name: "${VOLUME_PORTAINER}"

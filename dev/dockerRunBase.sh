@@ -46,10 +46,12 @@ export DOCKER_MACHINE_API_REMOTE_NAME=${DOCKER_MACHINE_API_REMOTE_NAME:-''}
 
 #portainer
 export PORTAINER_AGENT_SECRET=${PORTAINER_AGENT_SECRET:-'7x*EJwz6JKCHstQq6nLL'}
+export VOLUME_PORTAINER=${VOLUME_PORTAINER:-'portainer_volume'}
 
 export MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-'haakco'}
 export MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-'f534e6a4-1db4-11ea-80a1-644bf012e4c4'}
 export MINIO_PORT=${MINIO_PORT:-'9080'}
+export VOLUME_MINIO=${VOLUME_MINIO:-'db_minio_vol'}
 
 export GOOGLE_DRIVE_CLIENT_ID=${GOOGLE_DRIVE_CLIENT_ID:-''}
 export GOOGLE_DRIVE_CLIENT_SECRET=${GOOGLE_DRIVE_CLIENT_SECRET:-''}
@@ -89,6 +91,7 @@ export POSTGRES_MAX_WAL_SIZE=${POSTGRES_MAX_WAL_SIZE:-'2GB'}
 export POSTGRES_MAX_WORKER_PROCESSES=${POSTGRES_MAX_WORKER_PROCESSES:-'4'}
 export POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER=${POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER:-'2'}
 export POSTGRES_MAX_PARALLEL_WORKERS=${POSTGRES_MAX_PARALLEL_WORKERS:-'4'}
+export VOLUME_POSTGRESQL_NAME=${VOLUME_POSTGRESQL_NAME:-'db_haakco_pgmaster_vol'}
 
 #mail relay
 export MAIL_RELAY_HOST=${MAIL_RELAY_HOST:-'smtp.mailtrap.io'}
@@ -97,12 +100,14 @@ export MAIL_RELAY_SMTP_USER_NAME=${MAIL_RELAY_SMTP_USER_NAME:-''}
 export MAIL_RELAY_SMTP_PASS=${MAIL_RELAY_SMTP_PASS:-''}
 export MAIL_RELAY_DOMAIN=${MAIL_RELAY_DOMAIN:-'haak.co'}
 export MAIL_RELAY_ALLOWED_SENDER_DOMAINS=${MAIL_RELAY_ALLOWED_SENDER_DOMAINS:-''}
+export VOLUME_MAIL_RELAY=${VOLUME_MAIL_RELAY:-'mail-relay-volume'}
 
 #elk
 export ELK_MEMORY_LIMIT=${ELK_MEMORY_LIMIT:-1600M}
 export ELK_ES_JAVA_OPTS=${ELK_ES_JAVA_OPTS:-'-Xms1g -Xmx1g'}
 export ELK_ELASTICSEARCH_USERNAME=${ELK_ELASTICSEARCH_USERNAME:-'elastic'}
 export ELK_ELASTICSEARCH_PASSWORD=${ELK_ELASTICSEARCH_PASSWORD:-'7qrzE6X*U@yV973YTgRg'}
+export VOLUME_ELK_ELASTICSEARCH=${VOLUME_ELK_ELASTICSEARCH:-'db_haakco_elasticsearch'}
 
 export ELK_ENVIROMENT=${ELK_ENVIROMENT:-"${API_APP_ENV}"}
 export ELK_FILEBEAT_SHIPPER_NAME=${ELK_FILEBEAT_SHIPPER_NAME:-"haakco-php-filebeat"}
@@ -267,10 +272,14 @@ export LARAVEL_PASSPORT_PASSWORD_GRANT_CLIENT_ID=${LARAVEL_PASSPORT_PASSWORD_GRA
 export LARAVEL_PASSPORT_PASSWORD_GRANT_CLIENT_SECRET=${LARAVEL_PASSPORT_PASSWORD_GRANT_CLIENT_SECRET:-'fmEatZVcOEdpcRRkbjfNF7wCmOZlKUR89suhdFGx'}
 
 export VOLUME_LARAVEL_API=${VOLUME_LARAVEL_API:-$(realpath "${RUN_DIR}/../../haakco-api")}
-export VOLUME_LARAVEL_API_ZSH_HISTORY_WEB=${VOLUME_LARAVEL_API_ZSH_HISTORY_WEB:-$(realpath "${RUN_DIR}/../../docker-data/haakco-api/zsh_history_web")}
-export VOLUME_LARAVEL_API_ZSH_HISTORY_ROOT=${VOLUME_LARAVEL_API_ZSH_HISTORY_ROOT:-$(realpath "${RUN_DIR}/../../docker-data/haakco-api/zsh_history_root")}
-export VOLUME_LARAVEL_API_BASH_HISTORY_WEB=${VOLUME_LARAVEL_API_BASH_HISTORY_WEB:-$(realpath "${RUN_DIR}/../../docker-data/haakco-api/bash_history_web")}
-export VOLUME_LARAVEL_API_BASH_HISTORY_ROOT=${VOLUME_LARAVEL_API_BASH_HISTORY_ROOT:-$(realpath "${RUN_DIR}/../../docker-data/haakco-api/bash_history_root")}
+export VOLUME_DOCKER_DATA=${VOLUME_DOCKER_DATA:-$(realpath "${RUN_DIR}/../../docker-data")}
+export VOLUME_LARAVEL_API_ZSH_HISTORY_WEB=${VOLUME_LARAVEL_API_ZSH_HISTORY_WEB:-"${VOLUME_DOCKER_DATA}/haakco-api/zsh_history_web"}
+export VOLUME_LARAVEL_API_ZSH_HISTORY_ROOT=${VOLUME_LARAVEL_API_ZSH_HISTORY_ROOT:-"${VOLUME_DOCKER_DATA}/haakco-api/zsh_history_root"}
+export VOLUME_LARAVEL_API_BASH_HISTORY_WEB=${VOLUME_LARAVEL_API_BASH_HISTORY_WEB:-"${VOLUME_DOCKER_DATA}/haakco-api/bash_history_web"}
+export VOLUME_LARAVEL_API_BASH_HISTORY_ROOT=${VOLUME_LARAVEL_API_BASH_HISTORY_ROOT:-"${VOLUME_DOCKER_DATA}/haakco-api/bash_history_root"}
+
+## REDIS
+export VOLUME_REDIS_DB=${VOLUME_REDIS_DB:-"db_haak_redis"}
 
 mkdir -p "$(dirname "${VOLUME_LARAVEL_API_ZSH_HISTORY_WEB}")"
 touch "${VOLUME_LARAVEL_API_ZSH_HISTORY_WEB}"
@@ -340,11 +349,7 @@ if [[ "${ENABLE_LARAVEL_ECHO_SERVER}" = "TRUE" ]]; then
   docker stack deploy --compose-file ./stack-files/stack-laravel-echo.yml --prune --with-registry-auth "${APP_NAME}-laravel-echo" &
 fi
 
-if [[ "${API_USE_NFS_MOUNT}" = "TRUE" ]]; then
-  docker stack deploy --compose-file ./stack-files/stack-laravel-api-nfs.yml --prune --with-registry-auth "${APP_NAME}-laravel-api-nfs" &
-else
-  ## Clean up link to nfs volume other wise if location is changed it doesn't update
-  docker volume rm haakco-laravel-nfs_api_nfs
-  sleep 1
-  docker stack deploy --compose-file ./stack-files/stack-laravel-api.yml --prune --with-registry-auth "${APP_NAME}-laravel-api" &
-fi
+## Clean up link to nfs volume other wise if location is changed it doesn't update
+docker volume rm haakco-laravel-nfs_api_nfs
+sleep 1
+docker stack deploy --compose-file ./stack-files/stack-laravel-api-nfs.yml --prune --with-registry-auth "${APP_NAME}-laravel-api-nfs" &

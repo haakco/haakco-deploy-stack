@@ -56,4 +56,4 @@ networks:
 volumes:
   db_minio_vol:
     external: false
-    name: db_minio_vol
+    name: "${VOLUME_MINIO}"

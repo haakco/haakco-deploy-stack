@@ -56,4 +56,4 @@ networks:
 volumes:
   db_haakco_pgmaster_vol:
     external: false
-    name: db_haakco_pgmaster_vol
+    name: "${VOLUME_POSTGRESQL_NAME}"

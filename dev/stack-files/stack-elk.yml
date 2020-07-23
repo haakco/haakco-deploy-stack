@@ -147,4 +147,4 @@ networks:
 volumes:
   db_haakco_elasticsearch:
     external: false
-    name: db_haakco_elasticsearch
+    name: "${VOLUME_ELK_ELASTICSEARCH}"

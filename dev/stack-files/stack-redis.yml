@@ -77,4 +77,4 @@ networks:
 volumes:
   db_haak_redis:
     external: false
-    name: db_haak_redis
+    name: "${VOLUME_REDIS_DB}"

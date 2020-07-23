@@ -50,8 +50,8 @@ services:
       - "LARAVEL_ECHO_API_ORIGIN_ALLOW_ORIGIN=${LARAVEL_ECHO_API_ORIGIN_ALLOW_ORIGIN}"
       - "LARAVEL_ECHO_API_ORIGIN_ALLOW_METHODS=${LARAVEL_ECHO_API_ORIGIN_ALLOW_METHODS}"
       - "LARAVEL_ECHO_API_ORIGIN_ALLOW_HEADERS=${LARAVEL_ECHO_API_ORIGIN_ALLOW_HEADERS}"
-#    ports:
-#      - "6001:6001"
+    #    ports:
+    #      - "6001:6001"
     networks:
       haakco-net:
         aliases:
@@ -68,10 +68,3 @@ networks:
     attachable: true
     external: true
     driver: overlay
-volumes:
-  api_nfs:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
-      device: ":${VOLUME_LARAVEL_API}"
