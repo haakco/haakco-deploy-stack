@@ -114,6 +114,7 @@ services:
       - "${VOLUME_TRAEFIK_TRAEFIK_YAML}:/traefik/traefik.yaml"
       - "${VOLUME_TRAEFIK_DIR_CERTIFICATE_PEM}:/ssl/certificate.pem"
       - "${VOLUME_TRAEFIK_DIR_PRIVKEY_PEM}:/ssl/certificate.key"
+      - "${VOLUME_TRAEFIK_DIR}/acme.json:/acme.json"
 networks:
   traefik-net:
     attachable: true
