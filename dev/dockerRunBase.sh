@@ -8,8 +8,8 @@ export APP_NAME=${APP_NAME:-'haakco'}
 export APP_NETWORK=${APP_NETWORK:-"${APP_NAME}-net"}
 export TRAEFIK_NETWORK=${TRAEFIK_NETWORK:-'traefik-net'}
 
-export ADMIN_DOMAIN=${ADMIN_DOMAIN:-'dev.haak.co'}
 export DNS_DOMAIN=${DNS_DOMAIN:-'dev.haak.co'}
+export ADMIN_DOMAIN=${ADMIN_DOMAIN:-"${DNS_DOMAIN}"}
 
 export TIME_ZONE=${TIME_ZONE:-'Africa/Johannesburg'}
 
